@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8082
 
 spring:
   application:
@@ -9,7 +9,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8080/realms/logistics-realm
+          issuer-uri: http://localhost:8082/realms/logistics-realm
 
 management:
   endpoints:

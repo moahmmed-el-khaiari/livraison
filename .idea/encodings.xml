@@ -4,5 +4,6 @@
     <file url="file://$PROJECT_DIR$/MGW/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/MSS/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/discovery-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/order_service/src/main/java" charset="UTF-8" />
   </component>
 </project>
