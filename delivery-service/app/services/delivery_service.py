@@ -32,7 +32,7 @@ class DeliveryService:
         task = DeliveryTask(
             id=new_uuid(),
             tracking_number=req.tracking_number,
-            status=DeliveryStatus.CREATED.value,
+            status=DeliveryStatus.CREATED,  # ✅ Enum SQLAlchemy
             courier_id=req.courier_id,
             last_lat=None,
             last_lng=None,
@@ -45,11 +45,11 @@ class DeliveryService:
         self.repo.save(db)
         self.repo.refresh(db, task)
 
-        # ✅ Option recommandé : créer aussi l’event CREATED dans tracking
+        # Event tracking (API externe → string)
         self.tracking.add_event(
             TrackingEventCreate(
                 tracking_number=req.tracking_number,
-                status=TrackingStatus.CREATED.value,  # ✅ STRING
+                status=TrackingStatus.CREATED.value,
                 message="Delivery task created",
             )
         )
@@ -61,13 +61,16 @@ class DeliveryService:
         if not task:
             raise HTTPException(status_code=404, detail="Delivery task not found")
 
-        if task.status not in (DeliveryStatus.CREATED.value, DeliveryStatus.FAILED_ATTEMPT.value):
+        if task.status not in (
+            DeliveryStatus.CREATED,
+            DeliveryStatus.FAILED_ATTEMPT,
+        ):
             raise HTTPException(
                 status_code=409,
                 detail=f"Cannot start delivery from status: {task.status}",
             )
 
-        task.status = DeliveryStatus.OUT_FOR_DELIVERY.value
+        task.status = DeliveryStatus.OUT_FOR_DELIVERY
         task.last_lat = req.lat
         task.last_lng = req.lng
         task.updated_at = now_utc()
@@ -78,7 +81,7 @@ class DeliveryService:
         self.tracking.add_event(
             TrackingEventCreate(
                 tracking_number=tracking_number,
-                status=TrackingStatus.OUT_FOR_DELIVERY.value,  # ✅ FIX
+                status=TrackingStatus.OUT_FOR_DELIVERY.value,
                 city=req.city,
                 lat=req.lat,
                 lng=req.lng,
@@ -93,13 +96,13 @@ class DeliveryService:
         if not task:
             raise HTTPException(status_code=404, detail="Delivery task not found")
 
-        if task.status != DeliveryStatus.OUT_FOR_DELIVERY.value:
+        if task.status != DeliveryStatus.OUT_FOR_DELIVERY:
             raise HTTPException(
                 status_code=409,
                 detail="Delivery attempt allowed only when OUT_FOR_DELIVERY",
             )
 
-        task.status = DeliveryStatus.FAILED_ATTEMPT.value
+        task.status = DeliveryStatus.FAILED_ATTEMPT
         task.last_lat = req.lat
         task.last_lng = req.lng
         task.note = req.reason
@@ -108,11 +111,10 @@ class DeliveryService:
         self.repo.save(db)
         self.repo.refresh(db, task)
 
-        # ✅ FIX: .value (sinon tu envoies Enum)
         self.tracking.add_event(
             TrackingEventCreate(
                 tracking_number=tracking_number,
-                status=TrackingStatus.EXCEPTION.value,  # ✅ FIX
+                status=TrackingStatus.EXCEPTION.value,
                 lat=req.lat,
                 lng=req.lng,
                 message=f"Delivery failed: {req.reason}",
@@ -126,13 +128,13 @@ class DeliveryService:
         if not task:
             raise HTTPException(status_code=404, detail="Delivery task not found")
 
-        if task.status != DeliveryStatus.OUT_FOR_DELIVERY.value:
+        if task.status != DeliveryStatus.OUT_FOR_DELIVERY:
             raise HTTPException(
                 status_code=409,
                 detail="Complete allowed only when OUT_FOR_DELIVERY",
             )
 
-        task.status = DeliveryStatus.DELIVERED.value
+        task.status = DeliveryStatus.DELIVERED
         task.last_lat = req.lat
         task.last_lng = req.lng
         task.note = req.note
@@ -141,11 +143,10 @@ class DeliveryService:
         self.repo.save(db)
         self.repo.refresh(db, task)
 
-        # ✅ FIX: .value (sinon tu envoies Enum)
         self.tracking.add_event(
             TrackingEventCreate(
                 tracking_number=tracking_number,
-                status=TrackingStatus.DELIVERED.value,  # ✅ FIX
+                status=TrackingStatus.DELIVERED.value,
                 city=req.city,
                 lat=req.lat,
                 lng=req.lng,
