@@ -1,20 +1,25 @@
-from sqlalchemy import Column, String, DateTime, Float, Text
-from sqlalchemy.sql import func
+from datetime import datetime
+from typing import Optional
+
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import String, Float, DateTime
+
 from app.db import Base
+
 
 class TrackingEvent(Base):
     __tablename__ = "tracking_events"
 
-    id = Column(String(36), primary_key=True, index=True)
-    tracking_number = Column(String(64), index=True, nullable=False)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    tracking_number: Mapped[str] = mapped_column(String(50), index=True, nullable=False)
 
-    status = Column(String(40), nullable=False)
-    source = Column(String(20), nullable=False)
+    status: Mapped[str] = mapped_column(String(30), nullable=False)
+    source: Mapped[str] = mapped_column(String(30), nullable=False)
 
-    city = Column(String(100), nullable=True)
-    message = Column(Text, nullable=True)
+    city: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
+    message: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
 
-    lat = Column(Float, nullable=True)
-    lng = Column(Float, nullable=True)
+    lat: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    lng: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
 
-    event_time = Column(DateTime(timezone=True), server_default=func.now(), index=True)
+    event_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
