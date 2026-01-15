@@ -3,3 +3,7 @@
 __pycache__/
 *.pyc
 
+
+# Env
+notification_service/.env
+
