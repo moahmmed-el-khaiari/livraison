@@ -1,0 +1,31 @@
+from pydantic import BaseModel
+from enum import Enum
+from typing import Optional
+
+class TrackingStatus(str, Enum):
+    PICKED_UP = "PICKED_UP"
+    CREATED = "CREATED"
+    IN_TRANSIT = "IN_TRANSIT"
+    OUT_FOR_DELIVERY = "OUT_FOR_DELIVERY"
+    DELIVERED = "DELIVERED"
+    EXCEPTION = "EXCEPTION"
+
+class TrackingEventCreate(BaseModel):
+    tracking_number: str
+    status: str  # ✅ interop microservices
+    source: str = "SYSTEM"
+    city: Optional[str] = None
+    message: Optional[str] = None
+    lat: Optional[float] = None
+    lng: Optional[float] = None
+
+class TrackingEventOut(BaseModel):
+    id: str
+    tracking_number: str
+    status: str
+    source: str
+    city: Optional[str] = None
+    message: Optional[str] = None
+    lat: Optional[float] = None
+    lng: Optional[float] = None
+    event_time: str
